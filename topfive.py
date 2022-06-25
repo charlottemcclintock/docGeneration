@@ -16,11 +16,6 @@ from matplotlib.lines import Line2D
 from class_structure import Viz
 
 class TopFive(Viz):
-    '''
-    Pull & preprocess data, create side by side plots of 
-    average USS performance and count of services by month and
-    average USS performance by section and month
-    '''
     
     def __init__(self, place): 
 
@@ -35,7 +30,7 @@ class TopFive(Viz):
 
     def queryData(self):
         '''
-        Query data from SQL, format query with mission. 
+        Query data from SQL, format query with place. 
         '''
 
         # define formattable query
@@ -65,7 +60,7 @@ class TopFive(Viz):
 
             for name, group_df in groups: 
                 # mission average and total responses
-                group_sum = sum(group_df['Satisfaction Score'] * group_df['Count of Respondents'])
+                group_sum = sum(group_df['Score'] * group_df['Count of Respondents'])
                 total_responses = sum(group_df['Count of Respondents'])
                 group_avg = group_sum/total_responses
                 # store in dict
@@ -73,7 +68,7 @@ class TopFive(Viz):
                 'Score': group_avg, 
                 'Count of Respondents': total_responses, 
                 'Section': pd.unique(group_df['Section'])[0], 
-                'Comparison Score': pd.unique(group_df['Regional Average Satisfcation Score'])[0]}
+                'Comparison Score': pd.unique(group_df['Comparison Score'])[0]}
                 grouped_avgs.append(group_dict)
 
             data = pd.DataFrame(grouped_avgs)
