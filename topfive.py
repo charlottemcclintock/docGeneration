@@ -113,9 +113,9 @@ class TopFive(Viz):
             lower_bound = 0
         
         # add labels
-        axs[0].set(xlabel='Average ICASS Annual Survey Customer Satisfaction Score', 
+        axs[0].set(xlabel='Average Score', 
                     ylabel=None, xlim=(lower_bound, 5), title='Top 5 Cost Centers')
-        axs[1].set(xlabel='Average ICASS Annual Survey Customer Satisfaction Score', 
+        axs[1].set(xlabel='Average Score', 
                     ylabel=None, xlim=(lower_bound, 5), title='Bottom 5 Cost Centers')
 
 
