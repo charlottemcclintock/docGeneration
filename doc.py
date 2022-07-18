@@ -18,7 +18,7 @@ class BuildDocument():
         place (str): place entity
     
     Returns: 
-        demo-{mission}.docx - compiled Word document, saved in mission folder.
+        demo-{place}.docx - compiled Word document, saved in place folder.
     '''
 
     def __init__(self, place):
