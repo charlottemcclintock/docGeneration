@@ -7,8 +7,19 @@ import os
 import glob
 import pyodbc
 import pandas as pd
+from class_structure import Viz
 
 class BuildDocument(): 
+    '''
+    Code to build Word document from visualizations and text in mission folders
+    using python-docx.
+
+    Params: 
+        place (str): place entity
+    
+    Returns: 
+        demo-{mission}.docx - compiled Word document, saved in mission folder.
+    '''
 
     def __init__(self, place):
 
@@ -22,31 +33,35 @@ class BuildDocument():
 
 
     def getPlaceInfo(self):
-
-        # database connection class
-        cnxn = pyodbc.connect("None};"
-            "Server=None;"
-            "Database=None;"
-            "Trusted_Connection=yes;")
-
+        '''
+        Get basic place information and save as class attribute.
+        '''
         # define query to get USS compliance by service type
-        query = ''''''
+        query = '''OMITTED'''
 
         # format sql statement and query data 
-        mission_query = query.format("'"+ self.place + "'")
-        overview = pd.read_sql(place_query, cnxn)
+        place_query = query.format("'"+ self.place + "'")
+        overview = pd.read_sql(place_query, Viz().cnxn)
         
         # save post info into class attribute
         self.overview = overview
 
     def importText(self):
+        '''
+        Import all text from standard_text and mission specific folders, 
+        save to a central dictionary for easy use in compiling document.
 
-        # list of paths to both specific and standard text
-        specific_text = glob.glob(os.path.join(os.getcwd(), "..", "test_examples", self.place, "*.txt"))
+        Returns: 
+            text_sections (dict): keys are filenames of .txt files, values are 
+            the text they contain. 
+        '''
+
+        # get list of paths to both specific and standard text using glob
+        specific_text = glob.glob(os.path.join(os.getcwd(), "..", "test_examples", self.mission, "*.txt"))
         standard_text = glob.glob(os.path.join(os.getcwd(),  "standard_text", "*.txt"))
         all_text = specific_text + standard_text
 
-        # create dict with section names and text sections
+        # create dict with filenames and text sections
         text_sections = dict()
         for file_path in all_text:
             # clean section name from file name
@@ -60,65 +75,70 @@ class BuildDocument():
 
     def buildDocument(self):
 
+        '''
+        Compile document sections and write out document. 
+
+        Returns: 
+            demo-{place}.docx - compiled Word document, saved in place folder.
+        '''
+
         # instantiate document class
         doc = docx.Document()
+
+        '''Define some helper functions to simplify later code '''
 
         # add bold line
         def add_bold_line(text):
             bold_text = doc.add_paragraph()
             bold_text.add_run(text).bold=True
 
-        # define some methods to shorten and simplify script
         # add bold, uppercase header
         def add_header(text): 
             header = doc.add_paragraph()
             header.add_run(text.upper()).bold=True
+
         # add italic, uppercase subheader
         def add_subheader(text): 
             header = doc.add_paragraph()
             header.add_run(text.upper()).italic=True
+
         # add figure from mission folder, pass in name and width
         def add_figure(name, width):
             doc.add_picture(f'../test_examples/{self.place}/{name}.png', width=Inches(width))
+            # note: if don't use if inserting image from other location
+
+        '''General document styling'''
 
         # set overall fonts
         font = doc.styles['Normal'].font
         font.name = 'Times New Roman'
 
-        # set up intro for document
-        add_bold_line('TO:')
-        add_bold_line('THROUGH:')
-        add_bold_line('FROM:')
-
-        # add horizontal line break
-        doc.add_paragraph('________________________________________________________________________')
+        '''Begin constructing main section of document.'''
 
         # add introduction header
         add_header('Introduction')
-        # add standard introduction text, format with region/oe score
+        # add standard introduction text, format with region/environment score
         doc.add_paragraph(self.text_sections['intro'].format(self.overview['Region'][0], self.overview['Score'][0]))
 
         # overview section
         add_header('Overview')
+        #doc.add_paragraph(self.text_sections['overview'])
+        #add_figure('overview', 5.5)
+
         doc.add_paragraph(self.text_sections['timeseries'])
         add_figure('timeseries', 5.5)
 
-        # top 5/bottom 5 - uss
+        # top 5/bottom 5 - icass
         add_header('Top & Bottom Services')
-        doc.add_paragraph(self.text_sections['topfive'])
-        add_figure('top5bottom5-uss', 6)
-
-        # page break for appendix
-        doc.add_page_break()
-        add_header('Appendix')
-        doc.add_paragraph('')
+        doc.add_paragraph(self.text_sections['topbottom'])
+        add_figure('top5bottom5', 6)
 
         # write out document
         doc.save(f'../test_examples/{self.place}/demo-{self.place}.docx')
         print('Wrote out document.')
 
-
+# %%
 if __name__ == "__main__":
-    instance = BuildDocument(place='Place')
+    instance = BuildDocument(place='Country')
 
-
+# %%
